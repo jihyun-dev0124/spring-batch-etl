@@ -1,0 +1,48 @@
+{
+  "hourlysales": [
+    {
+      "shop_no": 1,
+      "collection_date": "2025-11-30",
+      "collection_hour": "12",
+      "order_count": 6,
+      "item_count": 7,
+      "order_price_amount": "53000.00",
+      "shipping_fee": "40.00",
+      "order_sale_price": "5050.00",
+      "coupon_discount_price": "1000.00",
+      "actual_order_amount": "46990.00",
+      "refund_amount": "0.00",
+      "sales": "46990.00",
+      "used_points": "100.00",
+      "used_credits": "0.00",
+      "used_naver_points": "0.00",
+      "used_naver_cash": "0.00",
+      "refund_points": "0.00",
+      "refund_credits": "0.00",
+      "refund_naver_points": "0.00",
+      "refund_naver_cash": "0.00"
+    },
+    {
+      "shop_no": 1,
+      "collection_date": "2025-11-30",
+      "collection_hour": "11",
+      "order_count": 2,
+      "item_count": 4,
+      "order_price_amount": "85000.00",
+      "shipping_fee": "20.00",
+      "order_sale_price": "20.00",
+      "coupon_discount_price": "0.00",
+      "actual_order_amount": "85000.00",
+      "refund_amount": "0.00",
+      "sales": "85000.00",
+      "used_points": "300.00",
+      "used_credits": "0.00",
+      "used_naver_points": "0.00",
+      "used_naver_cash": "0.00",
+      "refund_points": "0.00",
+      "refund_credits": "0.00",
+      "refund_naver_points": "0.00",
+      "refund_naver_cash": "0.00"
+    }
+  ]
+}

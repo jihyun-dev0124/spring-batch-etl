@@ -1,0 +1,31 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:batch;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+  batch:
+    jdbc:
+      initialize-schema: always #운영환경, 개발/로컬에서는 embedded(메모리 DB에 batch table 자동 생성)
+    job:
+      enabled: false #애플리케이션 실행 시 자동 실행 막고, 수동으로 직접 실행
+  sql:
+    init:
+      mode: always
+      schema-locations:
+        - classpath:schema.sql
+        - classpath:batch-schema.sql
+mybatis:
+  mapper-locations: classpath*:mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+  type-aliases-package: io.github.jihyundev.spring_batch_etl.domain
+
+logging:
+  level:
+    root: debug
+    org.hibernate.sql:  debug
+    org.hibernate.type: trace

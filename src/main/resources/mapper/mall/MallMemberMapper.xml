@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.jihyundev.spring_batch_etl.mapper.mall.MallMemberMapper">
+    <insert id="upsertMallMember" parameterType="MallMember">
+        INSERT INTO tb_mall_member(
+            mall_id,
+            member_id,
+            name,
+            phone,
+            email,
+            status,
+            join_path,
+            joined_at,
+            created_at,
+            last_modified_at
+        )
+        VALUES (
+            #{mallId},
+            #{memberId},
+            #{name},
+            #{phone},
+            #{email},
+            #{status},
+            #{joinPath},
+            #{joinedAt},
+            #{createdAt},
+            #{lastModifiedAt}
+        )
+        ON DUPLICATE KEY UPDATE
+            name = VALUES(name),
+            phone= VALUES(phone),
+            email = VALUES(email),
+            last_modified_at = VALUES(last_modified_at)
+    </insert>
+
+    <insert id="upsertMallMembers">
+        INSERT INTO tb_mall_member
+        (mall_id,
+         member_id,
+         name,
+         phone,
+         email,
+         status,
+         join_path,
+         joined_at,
+         created_at,
+         last_modified_at
+        )
+        VALUES
+        <foreach collection="members" item="m" separator=",">
+            (
+                #{m.mallId},
+                #{m.memberId},
+                #{m.name},
+                #{m.phone},
+                #{m.email},
+                #{m.status},
+                #{m.joinPath},
+                #{m.joinedAt},
+                #{m.createdAt},
+                #{m.lastModifiedAt}
+            )
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+            name = VALUES(name),
+            phone= VALUES(phone),
+            email = VALUES(email),
+            last_modified_at = VALUES(last_modified_at)
+    </insert>
+
+    <select id="findByMallIdAndMemberId" resultType="MallMember" >
+        select id, mall_id, member_id, name, phone, email, status, join_path, joined_at, created_at, last_modified_at
+        from tb_mall_member
+        where mall_id = #{mallId}
+        and member_id = #{memberId}
+    </select>
+
+    <select id="findAll" resultType="MallMember">
+        select id, mall_id, member_id, name, phone, email, status, join_path, joined_at, created_at, last_modified_at
+        from tb_mall_member
+    </select>
+</mapper>

@@ -1,0 +1,49 @@
+{
+  "customersprivacy": [
+    {
+      "member_id": "memberId1",
+      "name": "John Doe",
+      "phone": "010-0000-0000",
+      "email": "sample@sample.com",
+      "birthday": "1999-06-20",
+      "city": "Seoul",
+      "state": "Sindaebang dong Dongjak-gu",
+      "address1": "Sindaebang dong Dongjak-gu, Seoul, Republic of Korea",
+      "address2": "Professional Construction Hall",
+      "zipcode": "07071",
+      "join_path": "P",
+      "created_date": "2025-12-02T11:19:27+09:00",
+      "last_login_date": "2025-12-02T11:19:27+09:00"
+    },
+    {
+      "member_id": "memberId2",
+      "name": "John Doe",
+      "phone": "010-0000-0000",
+      "email": "sample@sample.com",
+      "birthday": "1997-06-20",
+      "city": "Seoul",
+      "state": "Sindaebang dong Dongjak-gu",
+      "address1": "Sindaebang dong Dongjak-gu, Seoul, Republic of Korea",
+      "address2": "Professional Construction Hall",
+      "zipcode": "07071",
+      "join_path": "P",
+      "created_date": "2025-12-02T11:19:27+09:00",
+      "last_login_date": "2025-12-02T11:19:27+09:00"
+    },
+    {
+      "member_id": "memberId3",
+      "name": "John Doe",
+      "phone": "010-0000-0000",
+      "email": "sample@sample.com",
+      "birthday": "2000-06-20",
+      "city": "Seoul",
+      "state": "Sindaebang dong Dongjak-gu",
+      "address1": "Sindaebang dong Dongjak-gu, Seoul, Republic of Korea",
+      "address2": "Professional Construction Hall",
+      "zipcode": "07071",
+      "join_path": "P",
+      "created_date": "2025-12-02T11:19:27+09:00",
+      "last_login_date": "2025-12-02T11:19:27+09:00"
+    }
+  ]
+}

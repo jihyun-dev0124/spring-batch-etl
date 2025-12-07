@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.jihyundev.spring_batch_etl.mapper.mall.BatchErrorLogMapper">
+    <insert id="insertErrorLog" parameterType="BatchErrorLog">
+        INSERT INTO tb_batch_error_log(
+             job_name,
+             step_name,
+             domain_type,
+             mall_id,
+             entity_key,
+             biz_date,
+             error_type,
+             error_message,
+             raw_payload,
+             retry_flag,
+             retry_count
+        )
+        VALUES(
+               #{jobName},
+               #{stepName},
+               #{domainType},
+               #{mallId},
+               #{entityKey},
+               #{bizDate},
+               #{errorType},
+               #{errorMessage},
+               #{rawPayload},
+               #{retryFlag},
+               #{retryCount}
+        )
+    </insert>
+
+    <select id="findAll" resultType="BatchErrorLog">
+        SELECT *
+        FROM tb_batch_error_log
+    </select>
+</mapper>
