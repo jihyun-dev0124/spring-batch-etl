@@ -6,7 +6,7 @@ import io.github.jihyundev.spring_batch_etl.common.JsonConverter;
 import io.github.jihyundev.spring_batch_etl.domain.batch.BatchDomainType;
 import io.github.jihyundev.spring_batch_etl.domain.batch.BatchErrorLog;
 import io.github.jihyundev.spring_batch_etl.domain.member.MallMember;
-import io.github.jihyundev.spring_batch_etl.mapper.mall.BatchErrorLogMapper;
+import io.github.jihyundev.spring_batch_etl.mapper.batch.BatchErrorLogMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

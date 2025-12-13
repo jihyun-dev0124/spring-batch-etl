@@ -7,6 +7,7 @@ import io.github.jihyundev.spring_batch_etl.batch.exception.TransientApiExceptio
 import io.github.jihyundev.spring_batch_etl.batch.etl.processor.MemberItemProcessor;
 import io.github.jihyundev.spring_batch_etl.batch.etl.reader.MemberApiItemReader;
 import io.github.jihyundev.spring_batch_etl.batch.etl.writer.MemberItemWriter;
+import io.github.jihyundev.spring_batch_etl.batch.listener.BatchExecutionSummaryListener;
 import io.github.jihyundev.spring_batch_etl.batch.listener.MemberJobExecutionListener;
 import io.github.jihyundev.spring_batch_etl.batch.listener.MemberSkipListener;
 import io.github.jihyundev.spring_batch_etl.batch.listener.MemberStepExecutionListener;
@@ -100,7 +101,7 @@ public class MemberSyncJobConfig {
                 //2. 스킵 정책 (재시도해도 안고쳐지는 에러들)
                 .skip(InvalidMemberDataException.class) //데이터 자체가 잘못된 경우
                 .skip(IllegalArgumentException.class) //잘못된 매핑 등
-                .skipLimit(1000)       //최대 skip 허용 건수, 넘으면 즉시 배치 중단
+                .skipLimit(100)       //최대 skip 허용 건수, 넘으면 즉시 배치 중단
 
                 .listener(memberStepExecutionListener) //Step 단위 요약 + 실패 기준 ExitStatus 처리
                 .listener(memberSkipListener) //개별 실패 row DB 백업
@@ -110,10 +111,10 @@ public class MemberSyncJobConfig {
 
     //Job Bean
     @Bean
-    public Job memberSyncJob(JobRepository jobRepository, Step memberSyncStep, MemberJobExecutionListener memberJobExecutionListener) {
+    public Job memberSyncJob(JobRepository jobRepository, Step memberSyncStep, BatchExecutionSummaryListener batchExecutionSummaryListener) {
         return new JobBuilder("memberSyncJob", jobRepository)
                 .incrementer(new RunIdIncrementer()) //매 실행마다 run.id 증가
-                .listener(memberJobExecutionListener)
+                .listener(batchExecutionSummaryListener)
                 .start(memberSyncStep)
                 .build();
     }

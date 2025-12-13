@@ -38,8 +38,8 @@ public class BatchInfraConfig extends DefaultBatchConfiguration {
     @Bean
     public TaskExecutor batchTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(2);
-        executor.setMaxPoolSize(2);
+        executor.setCorePoolSize(4);
+        executor.setMaxPoolSize(8);
         executor.setQueueCapacity(500);
         executor.setThreadNamePrefix("batch-task-");
         executor.initialize();
@@ -50,7 +50,7 @@ public class BatchInfraConfig extends DefaultBatchConfiguration {
     public JobLauncher jobLauncher(JobRepository jobRepository, TaskExecutor batchTaskExecutor) throws Exception {
         TaskExecutorJobLauncher jobLauncher = new TaskExecutorJobLauncher();
         jobLauncher.setJobRepository(jobRepository);
-        jobLauncher.setTaskExecutor(null); //batchTaskExecutor - 비동기 설정, null - 동기 설정
+        jobLauncher.setTaskExecutor(batchTaskExecutor); //batchTaskExecutor - 비동기 설정, null - 동기 설정
         jobLauncher.afterPropertiesSet();
         return jobLauncher;
     }

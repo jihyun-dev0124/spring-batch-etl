@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="io.github.jihyundev.spring_batch_etl.mapper.mall.BatchErrorLogMapper">
+<mapper namespace="io.github.jihyundev.spring_batch_etl.mapper.batch.BatchErrorLogMapper">
     <insert id="insertErrorLog" parameterType="BatchErrorLog">
         INSERT INTO tb_batch_error_log(
              job_name,
@@ -33,5 +33,14 @@
     <select id="findAll" resultType="BatchErrorLog">
         SELECT *
         FROM tb_batch_error_log
+    </select>
+
+    <select id="countByExecutionContext" resultType="int">
+        select count(*)
+        from tb_batch_error_log
+        where job_name = #{jobName}
+        and domain_type = #{domainType}
+        and mall_id = #{mallId}
+        and (biz_date <![CDATA[>=]]> #{fromDate} and biz_date <![CDATA[<]]> #{toDate})
     </select>
 </mapper>

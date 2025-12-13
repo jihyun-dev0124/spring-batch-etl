@@ -22,7 +22,7 @@ public class MemberItemWriter implements ItemWriter<MallMember> {
 
         List<MallMember> items = new ArrayList<>(chunk.getItems());
 
-        //dead rock 방지 -> unique key sort
+        //deadlock 방지 -> unique key sort
         items.sort(Comparator.comparing(MallMember::getMallId)
                 .thenComparing(MallMember::getMemberId));
 

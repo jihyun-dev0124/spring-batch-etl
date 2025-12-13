@@ -1,5 +1,6 @@
 package io.github.jihyundev.spring_batch_etl.batch.scheduler;
 
+import io.github.jihyundev.spring_batch_etl.domain.batch.BatchDomainType;
 import io.github.jihyundev.spring_batch_etl.domain.mall.MallConfig;
 import io.github.jihyundev.spring_batch_etl.mapper.mall.MallConfigMapper;
 import io.github.jihyundev.spring_batch_etl.service.MallConfigService;
@@ -36,7 +37,7 @@ public class MemberJobScheduler {
     /**
      * 전날 가입한 회원 정보 동기화
      */
-    @Scheduled(cron = "0 47 20 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 5 17 * * *", zone = "Asia/Seoul")
     public void runDailyMemberSyncJob() {
         LocalDate today = LocalDate.now(ZONE_SEOUL);
         LocalDateTime startDate = today.minusDays(1).atStartOfDay();
@@ -55,6 +56,7 @@ public class MemberJobScheduler {
                 .addLong("mallId", mallId)
                 .addString("startDate", startDateStr)
                 .addString("endDate", endDateStr)
+                .addString("domainType", BatchDomainType.MEMBER.toString())
                 .addLong("pageSize", pageSize != null ? pageSize.longValue() : 1000L)
                 .addLong("timestamp", System.currentTimeMillis()) //RunIdIncrementer와 별개로 항상 새로운 JobInstance 생성, .incrementer(new RunIdIncrementer())와 중복됨 - 주석처리
                 .toJobParameters();
@@ -64,8 +66,8 @@ public class MemberJobScheduler {
 
             JobExecution execution = jobLauncher.run(memberSyncJob, jobParameters);
 
-            log.info("[MemberJobScheduler] Job finished. id={}, status={}", execution.getId(), execution.getStatus());
-            //log.info("[MemberJobScheduler] Job started asynchronously. id={}, status={}", execution.getId(), execution.getStatus());
+            //log.info("[MemberJobScheduler] Job finished. id={}, status={}", execution.getId(), execution.getStatus()); //동기 실행
+            log.info("[MemberJobScheduler] Job started asynchronously. id={}, status={}", execution.getId(), execution.getStatus()); //비동기 실행
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException e) {
             log.warn("[MemberJobScheduler] Job not started. reason={}", e.getClass().getSimpleName(), e);
         } catch (Exception e) {

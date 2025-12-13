@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.jihyundev.spring_batch_etl.mapper.batch.BatchExecutionSummaryMapper">
+    <insert id="insertBatchExecutionSummary" parameterType="BatchExecutionSummary">
+        INSERT INTO tb_batch_execution_summary
+            (job_name,
+             step_name,
+             domain_type,
+             mall_id,
+             biz_date_from,
+             biz_date_to,
+             job_instance_id,
+             job_execution_id,
+             parameter_json,
+             status,
+             exit_code,
+             exit_message,
+             read_count,
+             write_count,
+             filter_count,
+             read_skip_count,
+             process_skip_count,
+             write_skip_count,
+             error_log_count,
+             start_time,
+             end_time,
+             duration_ms,
+             success_flag
+             <if test="alertSentFlag != null">
+             ,alert_sent_flag
+             </if>
+        ) VALUES (
+            #{jobName},
+            #{stepName},
+            #{domainType},
+            #{mallId},
+            #{bizDateFrom},
+            #{bizDateTo},
+            #{jobInstanceId},
+            #{jobExecutionId},
+            #{parameterJson},
+            #{status},
+            #{exitCode},
+            #{exitMessage},
+            #{readCount},
+            #{writeCount},
+            #{filterCount},
+            #{readSkipCount},
+            #{processSkipCount},
+            #{writeSkipCount},
+            #{errorLogCount},
+            #{startTime},
+            #{endTime},
+            #{durationMs},
+            #{successFlag}
+        <if test="alertSentFlag != null">
+            ,#{alertSentFlag}
+        </if>
+        )
+    </insert>
+</mapper>

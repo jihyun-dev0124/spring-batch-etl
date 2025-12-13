@@ -100,7 +100,6 @@ public class MemberApiItemReader implements ItemStreamReader<ApiMallMemberDto> {
         log.debug("[MemberApiItemReader] fetch members offset={}, limit={}, totalCount={}", currentOffset, remaining, totalCount);
 
         try {
-
             List<ApiMallMemberDto> result = apiRetryTemplate.execute(context -> {
                 int attempt = context.getRetryCount() + 1;
                 log.debug("[MemberApiItemReader] call external getMembers. attempt={}, offset={}, limit={}", attempt, currentOffset, remaining);
