@@ -37,7 +37,7 @@ public class MemberJobScheduler {
     /**
      * 전날 가입한 회원 정보 동기화
      */
-    @Scheduled(cron = "0 5 17 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 8 15 * * *", zone = "Asia/Seoul")
     public void runDailyMemberSyncJob() {
         LocalDate today = LocalDate.now(ZONE_SEOUL);
         LocalDateTime startDate = today.minusDays(1).atStartOfDay();
@@ -58,9 +58,10 @@ public class MemberJobScheduler {
                 .addString("endDate", endDateStr)
                 .addString("domainType", BatchDomainType.MEMBER.toString())
                 .addLong("pageSize", pageSize != null ? pageSize.longValue() : 1000L)
-                .addLong("timestamp", System.currentTimeMillis()) //RunIdIncrementer와 별개로 항상 새로운 JobInstance 생성, .incrementer(new RunIdIncrementer())와 중복됨 - 주석처리
+                .addLong("attemptCount", 1L) //job 실행 횟수
                 .toJobParameters();
 
+                // .addLong("timestamp", System.currentTimeMillis())
         try {
             log.info("[MemberJobScheduler] run memberSyncJob mallId={}, start={}, end={}, pageSize={}", mallId, startDate, endDate, pageSize);
 

@@ -14,4 +14,6 @@ public interface BatchErrorLogMapper {
 
     int countByExecutionContext(@Param("jobName") String jobName, @Param("domainType") String domainType, @Param("mallId") Long mallId,
                                 @Param("fromDate") LocalDateTime fromDate, @Param("toDate") LocalDateTime toDate);
+
+    int countPendingRetry();
 }

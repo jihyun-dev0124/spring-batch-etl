@@ -3,8 +3,10 @@ package io.github.jihyundev.spring_batch_etl.batch.listener;
 import io.github.jihyundev.spring_batch_etl.common.JsonConverter;
 import io.github.jihyundev.spring_batch_etl.domain.batch.BatchDomainType;
 import io.github.jihyundev.spring_batch_etl.domain.batch.BatchExecutionSummary;
+import io.github.jihyundev.spring_batch_etl.domain.batch.BatchRetryRequest;
 import io.github.jihyundev.spring_batch_etl.mapper.batch.BatchErrorLogMapper;
 import io.github.jihyundev.spring_batch_etl.mapper.batch.BatchExecutionSummaryMapper;
+import io.github.jihyundev.spring_batch_etl.mapper.batch.BatchRetryRequestMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.JobExecution;
@@ -22,6 +24,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class BatchExecutionSummaryListener implements JobExecutionListener {
     private final BatchExecutionSummaryMapper batchExecutionSummaryMapper;
+    private final BatchRetryRequestMapper batchRetryRequestMapper;
     private final BatchErrorLogMapper batchErrorLogMapper;
     private final JsonConverter jsonConverter;
 
@@ -30,6 +33,19 @@ public class BatchExecutionSummaryListener implements JobExecutionListener {
         try {
             BatchExecutionSummary summary = buildSummary(jobExecution);
             batchExecutionSummaryMapper.insertBatchExecutionSummary(summary);
+            System.out.println("summary.getStatus() = " + summary.getStatus());
+            String status = summary.getStatus();
+
+            BatchRetryRequest batchRetryRequest = buildBatchRetryRequest(jobExecution);
+            if (status.equals("FAILED")) {
+                //job 실행 실패시 retry 내역 저장
+                batchRetryRequestMapper.upsertFailedBatchRetryRequest(batchRetryRequest);
+            }
+            if (status.equals("COMPLETED")) {
+                //job retry 성공한 경우 종료 상태로 변경
+                batchRetryRequest.setStatus("DONE");
+                batchRetryRequestMapper.updateDoneBatchRetryRequest(batchRetryRequest);
+            }
         } catch (Exception e) {
             log.error("Failed to save batch execution summary", e);
         }
@@ -77,7 +93,7 @@ public class BatchExecutionSummaryListener implements JobExecutionListener {
 
         String status = jobExecution.getStatus().toString();
         String exitCode = jobExecution.getExitStatus().getExitCode();
-        String exitMsg = jobExecution.getExitStatus().getExitDescription();
+        String exitMsg = limitMessage(jobExecution.getExitStatus().getExitDescription(), 1000);
 
         boolean successFlag = computeSuccessFlag(status, readSkip, processSkip, writeSkip);
         String parameterJson = jsonConverter.convertItemToJson(params);
@@ -109,9 +125,47 @@ public class BatchExecutionSummaryListener implements JobExecutionListener {
                 .build();
     }
 
+    /**
+     * Job 실패시 -> 재배치 내역 저장
+     * @param jobExecution
+     * @return
+     */
+    private BatchRetryRequest buildBatchRetryRequest(JobExecution jobExecution) {
+        String jobName = jobExecution.getJobInstance().getJobName();
+        Long jobInstanceId = jobExecution.getJobInstance().getId();
+        Long jobExecutionId = jobExecution.getId();
+
+        JobParameters params = jobExecution.getJobParameters();
+        Long mallId = params.getLong("mallId");
+        BatchDomainType domainType = BatchDomainType.valueOf(params.getString("domainType"));
+        LocalDateTime fromDate = Optional.ofNullable(params.getString("startDate")).map(LocalDateTime::parse).orElse(null);
+        LocalDateTime toDate = Optional.ofNullable(params.getString("endDate")).map(LocalDateTime::parse).orElse(null);
+        String parameterJson = jsonConverter.convertItemToJson(params);
+
+        return BatchRetryRequest.builder()
+                .jobName(jobName)
+                .jobInstanceId(jobInstanceId)
+                .jobExecutionId(jobExecutionId)
+                .mallId(mallId)
+                .domainType(domainType)
+                .bizDateFrom(fromDate)
+                .bizDateTo(toDate)
+                .parameterJson(parameterJson)
+                .status(jobExecution.getStatus().toString())
+                .attemptCount(1L)
+                .requestedBy("batch")
+                .build();
+    }
+
     private boolean computeSuccessFlag(String status, int readSkip, int processSkip, int writeSkip) {
         if(!"COMPLETED".equals(status)) return false;
         int totalSkip = readSkip + processSkip + writeSkip;
         return totalSkip < 10; //skip 10건 미만이면 성공 처리
+    }
+
+    private String limitMessage(String message, Integer limit) {
+        message = message.trim();
+        if(message == null || message.isEmpty()) return null;
+        return message.length() > limit ? message.substring(0, limit) : message;
     }
 }

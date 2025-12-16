@@ -2,15 +2,14 @@ package io.github.jihyundev.spring_batch_etl.batch.job;
 
 import io.github.jihyundev.spring_batch_etl.api.MallApiClient;
 import io.github.jihyundev.spring_batch_etl.api.dto.member.ApiMallMemberDto;
-import io.github.jihyundev.spring_batch_etl.batch.exception.InvalidMemberDataException;
+import io.github.jihyundev.spring_batch_etl.batch.exception.InvalidDataException;
 import io.github.jihyundev.spring_batch_etl.batch.exception.TransientApiException;
 import io.github.jihyundev.spring_batch_etl.batch.etl.processor.MemberItemProcessor;
 import io.github.jihyundev.spring_batch_etl.batch.etl.reader.MemberApiItemReader;
 import io.github.jihyundev.spring_batch_etl.batch.etl.writer.MemberItemWriter;
 import io.github.jihyundev.spring_batch_etl.batch.listener.BatchExecutionSummaryListener;
-import io.github.jihyundev.spring_batch_etl.batch.listener.MemberJobExecutionListener;
-import io.github.jihyundev.spring_batch_etl.batch.listener.MemberSkipListener;
-import io.github.jihyundev.spring_batch_etl.batch.listener.MemberStepExecutionListener;
+import io.github.jihyundev.spring_batch_etl.batch.listener.BatchSkipListener;
+import io.github.jihyundev.spring_batch_etl.batch.listener.BatchStepExecutionListener;
 import io.github.jihyundev.spring_batch_etl.domain.mall.MallConfig;
 import io.github.jihyundev.spring_batch_etl.domain.member.MallMember;
 import io.github.jihyundev.spring_batch_etl.mapper.mall.MallMemberMapper;
@@ -27,7 +26,9 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.dao.TransientDataAccessException;
+import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.DeadlockLoserDataAccessException;
+import org.springframework.dao.QueryTimeoutException;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -82,8 +83,8 @@ public class MemberSyncJobConfig {
                                MemberApiItemReader memberApiItemReader,
                                MemberItemProcessor memberItemProcessor,
                                MemberItemWriter memberItemWriter,
-                               MemberStepExecutionListener memberStepExecutionListener,
-                               MemberSkipListener memberSkipListener) {
+                               BatchStepExecutionListener batchStepExecutionListener,
+                               BatchSkipListener batchSkipListener) {
 
         return new StepBuilder("memberSyncStep", jobRepository)
                 .<ApiMallMemberDto, MallMember>chunk(500, transactionManager)
@@ -95,27 +96,29 @@ public class MemberSyncJobConfig {
 
                 //1. 재시도 정책 - processor, writer에서 오류 발생시 같은 chunk 재시도, 3번 넘게 실패하면 skip 또는 Step 실패
                 .retry(TransientApiException.class) //외부 API 일시적 오류
-                .retry(TransientDataAccessException.class) // DB deadlock 등,,
+                .retry(DeadlockLoserDataAccessException.class) // DB deadlock
+                .retry(CannotAcquireLockException.class) // DB lock 획득 실패
+                .retry(QueryTimeoutException.class) //DB 쿼리 timeout
                 .retryLimit(3) //최대 3번까지 재시도
 
                 //2. 스킵 정책 (재시도해도 안고쳐지는 에러들)
-                .skip(InvalidMemberDataException.class) //데이터 자체가 잘못된 경우
+                .skip(InvalidDataException.class) //데이터 자체가 잘못된 경우
                 .skip(IllegalArgumentException.class) //잘못된 매핑 등
                 .skipLimit(100)       //최대 skip 허용 건수, 넘으면 즉시 배치 중단
 
-                .listener(memberStepExecutionListener) //Step 단위 요약 + 실패 기준 ExitStatus 처리
-                .listener(memberSkipListener) //개별 실패 row DB 백업
+                .listener(batchStepExecutionListener) //Step 단위 요약 + 실패 기준 ExitStatus 처리
+                .listener(batchSkipListener) //개별 실패 row DB 백업
                 .build();
-
     }
 
     //Job Bean
     @Bean
     public Job memberSyncJob(JobRepository jobRepository, Step memberSyncStep, BatchExecutionSummaryListener batchExecutionSummaryListener) {
         return new JobBuilder("memberSyncJob", jobRepository)
-                .incrementer(new RunIdIncrementer()) //매 실행마다 run.id 증가
+                //.incrementer(new RunIdIncrementer()) //매 실행마다 run.id 증가- 동시성 제어 시 제거
                 .listener(batchExecutionSummaryListener)
                 .start(memberSyncStep)
                 .build();
     }
+
 }

@@ -1,6 +1,8 @@
 package io.github.jihyundev.spring_batch_etl.service;
 
 import io.github.jihyundev.spring_batch_etl.domain.mall.MallConfig;
+import io.github.jihyundev.spring_batch_etl.dto.request.BatchExecutionCondition;
+import io.github.jihyundev.spring_batch_etl.dto.response.BatchExecutionSummaryDto;
 import io.github.jihyundev.spring_batch_etl.mapper.mall.MallConfigMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,5 +21,8 @@ public class MallConfigService {
         }
         return mallConfig;
     }
+
+
+
 
 }

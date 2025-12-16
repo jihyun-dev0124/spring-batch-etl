@@ -1,7 +1,7 @@
 package io.github.jihyundev.spring_batch_etl.batch.etl.processor;
 
 import io.github.jihyundev.spring_batch_etl.api.dto.member.ApiMallMemberDto;
-import io.github.jihyundev.spring_batch_etl.batch.exception.InvalidMemberDataException;
+import io.github.jihyundev.spring_batch_etl.batch.exception.InvalidDataException;
 import io.github.jihyundev.spring_batch_etl.domain.mall.MallConfig;
 import io.github.jihyundev.spring_batch_etl.domain.member.MallMember;
 import io.github.jihyundev.spring_batch_etl.domain.member.MemberStatus;
@@ -28,15 +28,15 @@ public class MemberItemProcessor implements ItemProcessor<ApiMallMemberDto, Mall
         String email = normalizeEmail(item.getEmail());
         String phone = normalizePhone(item.getPhone());
         if (item.getMemberId() == null || item.getMemberId().isBlank()) {
-            throw new InvalidMemberDataException("memberId is null or blank. raw=" + item);
+            throw new InvalidDataException("memberId is null or blank. raw=" + item);
         }
 
         if(email == null){
-            throw new InvalidMemberDataException("invalid email is null. memberId=" + item.getMemberId() + ", email=" + email);
+            throw new InvalidDataException("invalid email is null. memberId=" + item.getMemberId() + ", email=" + email);
         }
 
         if(phone == null){
-            throw new InvalidMemberDataException("invalid phone is null. memberId=" + item.getMemberId() + ", phone=" + phone);
+            throw new InvalidDataException("invalid phone is null. memberId=" + item.getMemberId() + ", phone=" + phone);
         }
 
         LocalDateTime joinedAt = parseJoinedAt(item.getCreatedDate());

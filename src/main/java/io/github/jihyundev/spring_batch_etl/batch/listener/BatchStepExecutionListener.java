@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 //Step 단위 로깅/모니터링
 @Slf4j
 @Component
-public class MemberStepExecutionListener implements StepExecutionListener {
+public class BatchStepExecutionListener implements StepExecutionListener {
 
     private static final int FAIL_THRESHOLD = 10; //실패 허용 건수, 품질 기준
 

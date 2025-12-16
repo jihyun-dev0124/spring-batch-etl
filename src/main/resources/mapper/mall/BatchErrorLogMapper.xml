@@ -43,4 +43,10 @@
         and mall_id = #{mallId}
         and (biz_date <![CDATA[>=]]> #{fromDate} and biz_date <![CDATA[<]]> #{toDate})
     </select>
+
+    <select id="countPendingRetry" resultType="int">
+        SELECT count(*)
+        FROM tb_batch_error_log
+        WHERE retry_flag = 1
+    </select>
 </mapper>

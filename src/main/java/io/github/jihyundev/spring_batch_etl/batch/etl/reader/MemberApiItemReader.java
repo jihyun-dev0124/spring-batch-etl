@@ -74,9 +74,10 @@ public class MemberApiItemReader implements ItemStreamReader<ApiMallMemberDto> {
 
         if (buffer == null || buffer.isEmpty()) {
             //count 기준으로 남은 데이터가 있어야 하는데 API가 빈 리스트 주는 경우
-            // API쪽 데이터 변경 등 예외 상황 -> 로그 남기고 종료 처리
+            // API쪽 데이터 변경 등 예외 상황 -> 로그 남기고, step 종료 처리
             if (currentOffset < totalCount) {
                 log.warn("[MemberApiItemReader] empty buffer while offset < totalCount. offset={}, totalCount={}", currentOffset, totalCount);
+                throw new TransientApiException("[MemberApiItemReader] API 응답 없음. empty buffer while offset < totalCount, offset=" + currentOffset + ", totalCount=" + totalCount);
             }
             return null;
         }

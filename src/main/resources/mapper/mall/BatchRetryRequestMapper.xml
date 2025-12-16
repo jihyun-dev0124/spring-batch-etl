@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.jihyundev.spring_batch_etl.mapper.batch.BatchRetryRequestMapper">
+    <insert id="upsertFailedBatchRetryRequest" parameterType="BatchRetryRequest">
+        INSERT INTO tb_batch_retry_request
+        (
+         job_name,
+         job_instance_id,
+         job_execution_id,
+         mall_id,
+         domain_type,
+         biz_date_from,
+         biz_date_to,
+         parameter_json,
+         status,
+         attempt_count,
+         requested_by
+        ) VALUES (
+            #{jobName},
+            #{jobInstanceId},
+            #{jobExecutionId},
+            #{mallId},
+            #{domainType},
+            #{bizDateFrom},
+            #{bizDateTo},
+            #{parameterJson},
+            #{status},
+            #{attemptCount},
+            #{requestedBy}
+        ) ON DUPLICATE KEY UPDATE
+           job_instance_id = VALUES(job_execution_id),
+           job_execution_id = VALUES(job_execution_id),
+           status = VALUES(status),
+           attempt_count = attempt_count + 1,
+           updated_at = NOW()
+    </insert>
+
+    <update id="updateDoneBatchRetryRequest" parameterType="BatchRetryRequest">
+        UPDATE tb_batch_retry_request
+        SET status = #{status},
+            job_instance_id = #{jobInstanceId},
+            job_execution_id = #{jobExecutionId},
+            attempt_count = attempt_count + 1,
+            updated_at = NOW()
+        WHERE job_name = #{jobName}
+        and mall_id = #{mallId}
+        and domain_type = #{domainType}
+        and biz_date_from = #{bizDateFrom}
+        and biz_date_to = #{bizDateTo}
+    </update>
+
+    <select id="findAll" parameterType="BatchRetryRequest">
+        SELECT *
+        FROM tb_batch_retry_request
+    </select>
+
+    <select id="findByJobExecutionId">
+        SELECT *
+        FROM tb_batch_retry_request
+        WHERE job_execution_id = #{jobExecutionId}
+    </select>
+
+</mapper>

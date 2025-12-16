@@ -1,7 +1,7 @@
 package io.github.jihyundev.spring_batch_etl.batch.etl.processor;
 
 import io.github.jihyundev.spring_batch_etl.api.dto.member.ApiMallMemberDto;
-import io.github.jihyundev.spring_batch_etl.batch.exception.InvalidMemberDataException;
+import io.github.jihyundev.spring_batch_etl.batch.exception.InvalidDataException;
 import io.github.jihyundev.spring_batch_etl.domain.mall.MallConfig;
 import io.github.jihyundev.spring_batch_etl.domain.member.MallMember;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,7 +63,7 @@ class MemberItemProcessorTest {
                 .build();
 
         // when & then
-        InvalidMemberDataException ex = assertThrows(InvalidMemberDataException.class, () -> processor.process(memberDto));
+        InvalidDataException ex = assertThrows(InvalidDataException.class, () -> processor.process(memberDto));
 
         // 메시지 검증
         assertTrue(ex.getMessage().contains("memberId=EXT-001"));

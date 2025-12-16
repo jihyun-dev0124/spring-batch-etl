@@ -58,4 +58,67 @@
         </if>
         )
     </insert>
+
+    <select id="selectExecutionSummaries" parameterType="BatchExecutionCondition" resultType="BatchExecutionSummaryDto">
+        SELECT id,
+               job_name,
+               step_name,
+               domain_type,
+               mall_id,
+               status,
+               start_time,
+               end_time,
+               (duration_ms / 1000) AS duration_sec,
+               biz_date_from,
+               biz_date_to,
+               job_instance_id,
+               job_execution_id,
+               exit_message,
+               read_count,
+               write_count,
+               (read_skip_count + process_skip_count + write_skip_count) as skip_count,
+               error_log_count
+        FROM tb_batch_execution_summary
+        <where>
+            <if test="mallId != null">
+                AND mall_id = #{mallId}
+            </if>
+            <if test="domainType != null">
+                AND domain_type = #{domainType}
+            </if>
+            <if test="fromDate != null">
+                AND biz_date_from <![CDATA[>=]]> #{fromDate}
+                <if test="toDate != null">
+                    AND biz_date_to <![CDATA[<=]]> #{toDate}
+                </if>
+            </if>
+        </where>
+        ORDER BY start_time DESC
+    </select>
+
+    <select id="countSummaries" parameterType="BatchExecutionCondition" resultType="int">
+        SELECT count(*)
+        FROM tb_batch_execution_summary
+        <where>
+            <if test="mallId != null">
+                AND mall_id = #{mallId}
+            </if>
+            <if test="domainType != null">
+                AND domain_type = #{domainType}
+            </if>
+            <if test="fromDate != null">
+                AND biz_date_from <![CDATA[>=]]> #{fromDate}
+                <if test="toDate != null">
+                    AND biz_date_to <![CDATA[<=]]> #{toDate}
+                </if>
+            </if>
+        </where>
+    </select>
+
+    <select id="selectTodayKpi" parameterType="BatchExecutionCondition" resultType="BatchExecutionKpi">
+        SELECT SUM(CASE WHEN start_time <![CDATA[>=]]> #{date} THEN 1 ELSE 0 END) AS today_total,
+               SUM(CASE WHEN start_time <![CDATA[>=]]> #{date} AND STATUS = 'FAILED' THEN 1 ELSE 0 END) AS today_failed,
+               AVG(duration_ms) / 1000 AS avg_duration_sec
+        FROM tb_batch_execution_summary
+    </select>
 </mapper>

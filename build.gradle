@@ -32,6 +32,7 @@ dependencies {
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.5'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
+	implementation 'p6spy:p6spy:3.9.1'
 	runtimeOnly "io.netty:netty-resolver-dns-native-macos:4.1.128.Final:osx-aarch_64" //local mac 테스트
 
 

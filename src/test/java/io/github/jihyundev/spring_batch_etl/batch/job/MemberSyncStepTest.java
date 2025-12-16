@@ -5,9 +5,11 @@ import io.github.jihyundev.spring_batch_etl.api.dto.member.ApiMallMemberDto;
 import io.github.jihyundev.spring_batch_etl.batch.exception.TransientApiException;
 import io.github.jihyundev.spring_batch_etl.domain.batch.BatchDomainType;
 import io.github.jihyundev.spring_batch_etl.domain.batch.BatchErrorLog;
+import io.github.jihyundev.spring_batch_etl.domain.batch.BatchRetryRequest;
 import io.github.jihyundev.spring_batch_etl.domain.mall.MallConfig;
 import io.github.jihyundev.spring_batch_etl.domain.member.MallMember;
 import io.github.jihyundev.spring_batch_etl.mapper.batch.BatchErrorLogMapper;
+import io.github.jihyundev.spring_batch_etl.mapper.batch.BatchRetryRequestMapper;
 import io.github.jihyundev.spring_batch_etl.mapper.mall.MallConfigMapper;
 import io.github.jihyundev.spring_batch_etl.mapper.mall.MallMemberMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,6 +57,9 @@ public class MemberSyncStepTest {
 
     @Autowired
     private BatchErrorLogMapper batchErrorLogMapper;
+
+    @Autowired
+    private BatchRetryRequestMapper batchRetryRequestMapper;
 
     @MockitoBean
     private MallApiClient mallApiClient;    //Reader stub
@@ -187,7 +192,9 @@ public class MemberSyncStepTest {
                 .addLong("mallId", 1L)
                 .addString("startDate", startDateStr)
                 .addString("endDate", endDateStr)
+                .addString("domainType", BatchDomainType.MEMBER.toString())
                 .addLong("pageSize", 1000L)
+                .addLong("timestamp", System.currentTimeMillis())
                 .toJobParameters();
 
         //when
@@ -209,6 +216,31 @@ public class MemberSyncStepTest {
         assertThat(log.getErrorType()).isEqualTo("PROCESS_ERROR");
         assertThat(log.getDomainType()).isEqualTo(BatchDomainType.MEMBER);
         assertThat(log.getEntityKey()).isEqualTo("TEST-3");
+    }
+
+    @Test
+    void memerSyncJob_실패시_batch_retry_내용_저장() throws Exception {
+        // given
+        JobParameters jobParameters = new JobParametersBuilder()
+                .addLong("mallId", 1L)
+                .addString("startDate", startDateStr)
+                .addString("endDate", endDateStr)
+                .addString("domainType", BatchDomainType.MEMBER.toString())
+                .addLong("pageSize", 1000L)
+                .addLong("attemptCount",1L)
+                .toJobParameters();
+
+        // when
+        when(mallApiClient.getMemberCount(any(), any(), any())).thenReturn(3);
+        when(mallApiClient.getMembers(any(), anyInt(), anyInt(), any(), any()
+        )).thenThrow(new TransientApiException("temporary api error"));
+
+        JobExecution execution = jobLauncherTestUtils.launchJob(jobParameters);
+
+        // then
+        assertThat(execution.getStatus()).isEqualTo(BatchStatus.FAILED);
+        List<BatchRetryRequest> retryList = batchRetryRequestMapper.findAll();
+        assertThat(retryList).hasSize(1);
     }
 
     private List<ApiMallMemberDto> makeDtoList(int size) {
