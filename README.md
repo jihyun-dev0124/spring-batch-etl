@@ -51,10 +51,10 @@
 * MyBatis 기반 batch upsert
 * 멱등성(Idempotency) 확보
 * 유니크 키 기준 정렬을 통한 데드락 완화
-<br><br>
 
 
------
+
+
 <br><br><br>
 ## 배치 실행 방법
 이 프로젝트는 배치 작업의 수동 실행과 스케줄러 기반 실행을 지원합니다. <br>
@@ -158,14 +158,14 @@ public class MemberJobScheduler {
 ```
 
 <br><br>
-## 3. 동시성 및 안정성 관련 참고
+## 동시성 및 안정성 관련 참고
 * 배치는 쇼핑몰 단위로 병렬 실행됩니다.
 * 동일한 mallId + 기간 + 도메인 파라미터는 동일 JobInstance로 인식되어 중복 실행이 제한됩니다. <br>
 이를 통해 스케줄러 재실행이나 운영자 수동 실행으로 인해 동일 쇼핑몰 배치가 동시에 실행되는 상황을 방지합니다.
 
 
 <br><br>
-## 4. 배치 실행 중 실패 발생 시 운영 흐름
+## 배치 실행 중 실패 발생 시 운영 흐름
 * Job 실패 및 재실행 이력은 실행 요약 테이블(tb_batch_execution_summary)과 재실행 요청 테이블(tb_batch_retry_request)을 통해 관리됩니다.
 * row 단위 실패, skip 이력은 에러 로그 테이블(tb_batch_error_log)에 기록됩니다.
 
