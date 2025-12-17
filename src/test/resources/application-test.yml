@@ -22,7 +22,8 @@ mybatis:
   mapper-locations: classpath*:mapper/**/*.xml
   configuration:
     map-underscore-to-camel-case: true
-  type-aliases-package: io.github.jihyundev.spring_batch_etl.domain
+  type-aliases-package: io.github.jihyundev.spring_batch_etl.domain,
+                        io.github.jihyundev.spring_batch_etl.dto
 
 logging:
   level:
